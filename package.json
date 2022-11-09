@@ -1,0 +1,24 @@
+{
+  "name": "taskmanagment",
+  "version": "1.0.0",
+  "description": "coursework in programming",
+  "main": "taskManagment.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BabylonVampire/taskManagment.git"
+  },
+  "keywords": [
+    "node",
+    "nodejs",
+    "js"
+  ],
+  "author": "Nikita Tabalov <nikitatabalov@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/BabylonVampire/taskManagment/issues"
+  },
+  "homepage": "https://github.com/BabylonVampire/taskManagment#readme"
+}
