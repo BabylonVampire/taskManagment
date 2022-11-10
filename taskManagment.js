@@ -318,7 +318,7 @@ function getRegisterData() {
 
     users[username] = newUser;
 
-    return 1;
+    loginPage();
 }
 
 function registerPage() {
@@ -431,12 +431,8 @@ function registerPage() {
     let regButton = document.createElement('button');
     regButton.type = 'button';
     regButton.innerHTML = 'Register';
-    regButton.onclick = function() {
-        if (getRegisterData()) {
-            document.getElementById('regForm').remove();
-            loginPage();
-        }
-    }
+    regButton.onclick = getRegisterData;
+
     buttonBox.appendChild(regButton);
     
     fieldSet.appendChild(nameBox);
