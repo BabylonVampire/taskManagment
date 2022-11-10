@@ -1,7 +1,5 @@
 let l = console.log;
 
-let ID = 0;
-
 const difficulties = [
     '',
     'Easy',
@@ -11,9 +9,13 @@ const difficulties = [
     'Hardcore'
 ];
 
+let ID = 0;
+
 let users = {};
 
 let tasks = [];
+
+let activeUser;
 
 function createNewTaskForm() {
     createTaskButton.style.visibility = 'hidden';
@@ -28,92 +30,113 @@ function createNewTaskForm() {
 
     //создание новой легенды
     let newLegend = document.createElement('legend');
-    newLegend.innerHTML = 'Создание новой задачи';
+    newLegend.innerHTML = 'Creating new task';
     fieldSet.appendChild(newLegend);
 
-    //p1
+    //nameBox
 
-    let p1 = document.createElement('p');
+    let nameBox = document.createElement('p');
 
     //label для ввода названия
     let namelabel = document.createElement('label');
     namelabel.for = 'name';
-    namelabel.innerHTML = 'Введите название задачи ';
-    p1.appendChild(namelabel);
+    namelabel.innerHTML = 'Enter name of task ';
+    nameBox.appendChild(namelabel);
 
     //input для ввода названия
     let nameInput = document.createElement('input');
     nameInput.className = 'input';
     nameInput.type = 'text';
     nameInput.id = 'name';
-    p1.appendChild(nameInput);
+    nameBox.appendChild(nameInput);
 
-    fieldSet.appendChild(p1);
+    fieldSet.appendChild(nameBox);
 
-    //p2
+    //textBox
 
-    let p2 = document.createElement('p');
+    let textBox = document.createElement('p');
 
     //label для ввода текста
     let textlabel = document.createElement('label');
     namelabel.for = 'text';
-    textlabel.innerHTML = 'Введите текст задачи ';
-    p2.appendChild(textlabel);
+    textlabel.innerHTML = 'Enter descriprion of the task ';
+    textBox.appendChild(textlabel);
 
     //input для ввода текста
     let textInput = document.createElement('input');
     textInput.className = 'input';
     textInput.type = 'text';
     textInput.id = 'text';
-    p2.appendChild(textInput);
+    textBox.appendChild(textInput);
 
-    fieldSet.appendChild(p2)
+    fieldSet.appendChild(textBox)
 
-    //p3
+    //lvlBox
 
-    p3 = document.createElement('p');
+    let lvlBox = document.createElement('p');
 
     //label для ввода сложности
     let lvllabel = document.createElement('label');
-    lvllabel.innerHTML = 'Выберете сложность задачи ';
-    p3.appendChild(lvllabel);
+    lvllabel.innerHTML = 'Select difficulty of task ';
+    lvlBox.appendChild(lvllabel);
 
     //выбор сложности
     let lvlInput = document.createElement('select');
-    lvlInput.className = 'input'
+    lvlInput.className = 'input';
     lvlInput.id = 'lvl';
     for (i = 0; i < difficulties.length; ++i) {
         let option = document.createElement('option');
         option.innerHTML = difficulties[i];
         lvlInput.appendChild(option);
     }
-    p3.appendChild(lvlInput);
+    lvlBox.appendChild(lvlInput);
 
-    fieldSet.appendChild(p3);
+    fieldSet.appendChild(lvlBox);
 
-    //p4
+    //timeBox
 
-    p4 = document.createElement('p');
+    timeBox = document.createElement('p');
 
     //label сроков
     let datelabel = document.createElement('label');
-    datelabel.innerHTML = 'Введите крайний срок сдачи ';
-    p4.appendChild(datelabel);
+    datelabel.innerHTML = 'Enter deadline ';
+    timeBox.appendChild(datelabel);
 
     //input сроков
     let dateInput = document.createElement('input');
     dateInput.className = 'input';
     dateInput.id = 'date';
     dateInput.type = 'date';
-    p4.appendChild(dateInput);
+    timeBox.appendChild(dateInput);
 
-    fieldSet.appendChild(p4);
+    fieldSet.appendChild(timeBox);
+
+    targetUserBox = document.createElement('p');
+
+    //label сроков
+    let targetUserlabel = document.createElement('label');
+    targetUserlabel.innerHTML = 'Enter recipients name ';
+    targetUserBox.appendChild(targetUserlabel);
+
+    //input сроков
+    let targetUserInput = document.createElement('select');
+    targetUserInput.className = 'input';
+    targetUserInput.id = 'targetUser';
+    targetUserInput.type = 'name';
+    for (var user in users) {
+        let option = document.createElement('option');
+        option.innerHTML = user;
+        targetUserInput.appendChild(option);
+    }
+    targetUserBox.appendChild(targetUserInput);
+
+    fieldSet.appendChild(targetUserBox);
 
     //кнопка завершения
     let finishButton = document.createElement('button');
     finishButton.type = 'button';
     finishButton.onclick = getData;
-    finishButton.innerHTML = 'Создать задачу';
+    finishButton.innerHTML = 'Create task';
     fieldSet.appendChild(finishButton);
 
     newForm.appendChild(fieldSet);
@@ -121,12 +144,14 @@ function createNewTaskForm() {
 }
 
 class Task {
-    constructor(name, textOfTask, lvl, timeOfEnding, id) {
+    constructor(name, textOfTask, lvl, timeOfEnding, id, targetUser) {
         this.name = name;
         this.textOfTask = textOfTask;
         this.lvl = lvl;
         this.timeOfEnding = timeOfEnding;
         this.id = id;
+        this.author = activeUser;
+        this.targetUser = targetUser;
     }
     remainingTime() {
         let date = new Date();
@@ -150,6 +175,13 @@ class Task {
         newLegend.innerHTML = this.name;
         fieldSet.appendChild(newLegend);
 
+        let authorBox = document.createElement('div');
+        authorBox.className = 'labelBox';
+
+        let authorLabel = document.createElement('label');
+        authorLabel.innerHTML = "appointed by: " + this.author;
+        authorBox.appendChild(authorLabel);
+
         let labelBox = document.createElement('div');
         labelBox.className = 'labelBox';
 
@@ -171,6 +203,7 @@ class Task {
         deleteButton.id = this.id;
         deleteButton.onclick = this.removeTask;
 
+        fieldSet.appendChild(authorBox);
         fieldSet.appendChild(labelBox);
         fieldSet.appendChild(textlabel);
         fieldSet.appendChild(deleteButton);
@@ -179,12 +212,12 @@ class Task {
         document.body.appendChild(newForm);
     }
     removeTask() {
-        for (let i = 0; i < tasks.length; ++i) {
-            if (tasks[i].id == +this.id) {
-                tasks.splice(i, 1);
+        users[activeUser].tasks.forEach((task) => {
+            if (task.id == +this.id) {
+                users[activeUser].tasks.splice(users[activeUser].tasks.indexOf(task), 1);
             }
-        }
-        showTasks();
+            showTasks();
+        })
     }
 }
 
@@ -195,14 +228,25 @@ class User {
         this.username = username;
         this.email = email;
         this.password = password;
+        this.tasks = [];
     }
 }
+
+
+let testUser1 = new User(1, 1, 1, 1, 1);
+users[1] = testUser1;
+
+let testUser2 = new User(2, 2, 2, 2, 2);
+users[2] = testUser2;
+
 
 function getData() {
     let name = document.getElementById('name').value;
     let text = document.getElementById('text').value;
     let lvl = document.getElementById('lvl').value;
     let date = document.getElementById('date').value;
+    let targetUser = document.getElementById('targetUser').value;
+    l(targetUser, users[targetUser]);
 
     if (!name || !text || !lvl || !date) return;
 
@@ -212,12 +256,12 @@ function getData() {
 
     ++ID;
 
-    tasks.push(task);
+    users[targetUser].tasks.push(task);
 
     let form = document.getElementById('taskCreation');
     document.body.removeChild(form);
 
-    task.createForm();
+    showTasks();
     //реализовать загрузку в бд
 }
 
@@ -243,6 +287,7 @@ function getLoginData() {
     }
 
     document.getElementById('loginForm').remove();
+    activeUser = username;
     createPage();
 }
 
@@ -253,6 +298,11 @@ function getRegisterData() {
     let email = document.getElementById('email').value;
     let password = document.getElementById('password').value;
     let repeatPassword = document.getElementById('repeatPassword').value;
+
+    if (!name || !surname || !username || !email || !password || !repeatPassword) {
+        document.getElementById('warning').innerHTML = 'all fields must be filled!';
+        return;
+    }
 
     if (users[username]) {
         document.getElementById('warning').innerHTML = 'Selected login is already in use';
@@ -431,7 +481,7 @@ function loginPage() {
     passwordBox.className = 'labelBox'
 
     let passwordLabel = document.createElement('label');
-    passwordLabel.innerHTML = "Username: ";
+    passwordLabel.innerHTML = "Password: ";
     passwordBox.appendChild(passwordLabel);
 
     let passwordInput = document.createElement('input');
@@ -469,7 +519,7 @@ function loginPage() {
 
 function showTasks() {
     document.querySelectorAll('task').forEach((task) => task.remove());
-    tasks.forEach((task) => {
+    users[activeUser].tasks.forEach((task) => {
         task.createForm();
     })
 }
