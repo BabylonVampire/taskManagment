@@ -318,6 +318,7 @@ function getRegisterData() {
 
     users[username] = newUser;
 
+    document.getElementById('regForm').remove();
     loginPage();
 }
 
