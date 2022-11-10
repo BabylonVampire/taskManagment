@@ -17,8 +17,11 @@ let tasks = [];
 
 let activeUser;
 
+//реализовать загрузку в бд
+
 function createNewTaskForm() {
-    createTaskButton.style.visibility = 'hidden';
+    closeAllTasks();
+    document.getElementById('interface').remove();
 
     //создание новой формы
     let newForm = document.createElement('div');
@@ -33,9 +36,32 @@ function createNewTaskForm() {
     newLegend.innerHTML = 'Creating new task';
     fieldSet.appendChild(newLegend);
 
+    //warningBox
+
+    let warningBox = document.createElement('div');
+    warningBox.className = 'labelBox';
+
+    let exitButton = document.createElement('button');
+    exitButton.type = 'button';
+    exitButton.innerHTML = 'Close';
+    exitButton.onclick = function() {
+        let form = document.getElementById('taskCreation');
+        document.body.removeChild(form);
+        createPage();
+        showTasks();
+    }
+    warningBox.appendChild(exitButton);
+
+    let warningLabel = document.createElement('label');
+    warningLabel.id = 'warning';
+    warningBox.appendChild(warningLabel);
+
+    fieldSet.appendChild(warningBox);
+
     //nameBox
 
-    let nameBox = document.createElement('p');
+    let nameBox = document.createElement('div');
+    nameBox.className = 'inputBox';
 
     //label для ввода названия
     let namelabel = document.createElement('label');
@@ -54,7 +80,8 @@ function createNewTaskForm() {
 
     //textBox
 
-    let textBox = document.createElement('p');
+    let textBox = document.createElement('div');
+    textBox.className = 'inputBox';
 
     //label для ввода текста
     let textlabel = document.createElement('label');
@@ -73,7 +100,8 @@ function createNewTaskForm() {
 
     //lvlBox
 
-    let lvlBox = document.createElement('p');
+    let lvlBox = document.createElement('div');
+    lvlBox.className = 'inputBox';
 
     //label для ввода сложности
     let lvllabel = document.createElement('label');
@@ -95,7 +123,8 @@ function createNewTaskForm() {
 
     //timeBox
 
-    timeBox = document.createElement('p');
+    timeBox = document.createElement('div');
+    timeBox.className = 'inputBox';
 
     //label сроков
     let datelabel = document.createElement('label');
@@ -111,7 +140,8 @@ function createNewTaskForm() {
 
     fieldSet.appendChild(timeBox);
 
-    targetUserBox = document.createElement('p');
+    targetUserBox = document.createElement('div');
+    targetUserBox.className = 'inputBox';
 
     //label сроков
     let targetUserlabel = document.createElement('label');
@@ -246,11 +276,13 @@ function getData() {
     let lvl = document.getElementById('lvl').value;
     let date = document.getElementById('date').value;
     let targetUser = document.getElementById('targetUser').value;
-    l(targetUser, users[targetUser]);
 
-    if (!name || !text || !lvl || !date) return;
+    if (!name || !text || !lvl || !date) {
+        document.getElementById('warning').innerHTML = 'All fields must be filled';
+        return;
+    }
 
-    createTaskButton.style.visibility = 'visible';
+    createPage();
 
     task = new Task(name, text, lvl, date, ID);
 
@@ -262,14 +294,28 @@ function getData() {
     document.body.removeChild(form);
 
     showTasks();
-    //реализовать загрузку в бд
 }
 
 function createPage() {
-    createTaskButton = document.createElement('button');
-    createTaskButton.onclick = createNewTaskForm;
+    let buttonBox = document.createElement('div');
+    buttonBox.className = 'buttonBox';
+    buttonBox.id = 'interface';
+
+    let logoutButton = document.createElement('button');
+    logoutButton.innerHTML = 'Log out';
+    logoutButton.onclick = function() {
+        closeAllTasks();
+        document.getElementById('interface').remove();
+        loginPage();
+    }
+    buttonBox.appendChild(logoutButton);
+
+    let createTaskButton = document.createElement('button');
     createTaskButton.innerHTML = 'Create new task';
-    document.body.appendChild(createTaskButton);
+    createTaskButton.onclick = createNewTaskForm;
+
+    buttonBox.appendChild(createTaskButton);
+    document.body.appendChild(buttonBox);
 }
 
 function getLoginData() {
@@ -289,6 +335,7 @@ function getLoginData() {
     document.getElementById('loginForm').remove();
     activeUser = username;
     createPage();
+    showTasks();
 }
 
 function getRegisterData() {
@@ -318,8 +365,7 @@ function getRegisterData() {
 
     users[username] = newUser;
 
-    document.getElementById('regForm').remove();
-    loginPage();
+    return 1;
 }
 
 function registerPage() {
@@ -330,11 +376,21 @@ function registerPage() {
     let fieldSet = document.createElement('div');
     fieldSet.className = 'fieldset';
 
+    let warningBox = document.createElement('div');
+    warningBox.className = 'labelBox';
+
+    let backButton = document.createElement('button');
+    backButton.type = 'button';
+    backButton.innerHTML = 'back to login';
+    backButton.onclick = function() {
+        document.getElementById('regForm').remove();
+        loginPage();
+    }
+    warningBox.appendChild(backButton);
+
     let warningLabel = document.createElement('label');
     warningLabel.id = 'warning';
-    fieldSet.appendChild(warningLabel);
-
-
+    warningBox.appendChild(warningLabel);
 
     let nameBox = document.createElement('div');
     nameBox.className = 'labelBox';
@@ -432,10 +488,15 @@ function registerPage() {
     let regButton = document.createElement('button');
     regButton.type = 'button';
     regButton.innerHTML = 'Register';
-    regButton.onclick = getRegisterData;
-
+    regButton.onclick = function() {
+        if (getRegisterData()) {
+            document.getElementById('regForm').remove();
+            loginPage();
+        };
+    }
     buttonBox.appendChild(regButton);
     
+    fieldSet.appendChild(warningBox);
     fieldSet.appendChild(nameBox);
     fieldSet.appendChild(surnameBox);
     fieldSet.appendChild(usernameBox);
@@ -515,10 +576,14 @@ function loginPage() {
 }
 
 function showTasks() {
-    document.querySelectorAll('task').forEach((task) => task.remove());
+    closeAllTasks();
     users[activeUser].tasks.forEach((task) => {
         task.createForm();
     })
+}
+
+function closeAllTasks() {
+    document.querySelectorAll('task').forEach((task) => task.remove());
 }
 
 loginPage();
