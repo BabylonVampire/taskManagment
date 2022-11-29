@@ -1,24 +1,61 @@
+@font-face {
+	font-family: 'Luminari'; 
+	src: url(./fonts/Luminari.ttf);
+}
 *{
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: Arial, Helvetica, sans-serif;
-    background-color: #fff;
+    font-family: "Luminari", Arial, Helvetica, sans-serif;
+    background-color: rgb(88, 88, 88);
+}
+#logout {
+    width: 10%;
+    min-width: 80px;
+}
+#checkbox {
+    width: 2rem;
+    height: 2rem;
+    box-shadow: 0px 4px 6px 0px rgba(107, 107, 107, 0.5);
+}
+#taskcreation {
+    width: 50%;
 }
 .form {
     width: calc(100% - 20px);
     justify-content: center;
     text-align: center;
     display: flex;
+    flex-direction: column;
+    align-items: center;
 }
-.buttonBox, .labelBox {
+.checkbox {
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin: 10px;
+    border: none;
+    border-radius: 10px;
+    text-align: center;
+}
+.buttonBox > * {
+    background-color: rgb(255, 255, 255);
+}
+.buttonBox, .labelBox, #box {
     display: flex;
     flex-direction: row;
+    justify-content: center;
+}
+.fieldset > *, .fieldset > * > * {
+    background-color: rgb(255, 255, 255);
 }
 .fieldset {
+    min-width: 25rem;
+    border: solid;
+    border-width: 7px;
+    border-color: rgb(114, 180, 255);
+    background-color: rgb(255, 255, 255);
     width: calc(25% - 20px);
-    border: none;
-    box-shadow: 0px 5px 10px 0px rgba(174, 174, 174, 0.5);
+    box-shadow: 0px 20px 20px 0px rgba(14, 14, 14, 0.5);
     border-radius: 10px;
     padding: 10px;
     margin: 10px;
@@ -27,32 +64,50 @@
     display: flex;
     flex-direction: column;
 }
+.task {
+    width: calc(100%);
+    border: none;
+    margin: 10px;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    align-content: center;
+}
 .inputBox, button {
-    width: calc(100% - 20px);
-    border-radius: 10px;    
-    box-shadow: 0px 5px 10px 0px rgba(174, 174, 174, 0.5);
+    font-size: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px 0px rgba(107, 107, 107, 0.5);
     padding: 10px;
     margin: 10px;
     border: none;
 }
 button:active {
-    background-color: rgb(255, 96, 96);
+    background-color: rgb(102, 117, 255);
     color: #fff;
     transition: 300ms;
 }
-.input, option {
+.input {
+    font-size: 20px;
     width: calc(100% - 20px);
     padding: 10px;
     margin: 10px;
     border: none;
     border-radius: 10px;    
-    box-shadow: 0px 5px 10px 0px rgba(174, 174, 174, 0.5);
+    box-shadow: 0px 4px 8px 0px rgba(107, 107, 107, 0.5);
     text-align: center;
 }
+option {
+    padding: 10px;
+    border-radius: 10px;
+    background-color: rgb(255, 255, 255);
+    box-shadow: 0px 5px 10px 0px rgba(14, 14, 14, 0.5);
+} 
 legend {
-    font-size: larger;
+    font-size: 20px;
 }
 label {
+    line-height: 1.5;
+    font-size: 20px;
     width: calc(100% - 20px);
     padding: 10px;
     margin: 10px;
