@@ -11,58 +11,11 @@ const difficulties = [
 
 // СОХРАНЕНИЕ ЗАДАЧ В ЛОКАЛ СТОРЕДЖ
 
-let ID = 0;
+let id = 0;
 let users = {};
 let tasks = [];
 let activeUser;
-
-const container = (contClassName, type, id, labelValue) => {
-    let Box = elementCreator({ element: 'div', className: contClassName });
-    let Label = elementCreator({ element: 'label' });
-    Label.setText(labelValue);
-
-    let Input = elementCreator({ element: 'input', id: id, className: 'input', type: type });
-    Box.setChild([Label, Input]);
-
-    return Box;
-}
-
-class elemCreator {
-    constructor(element) {
-        this.htmlelement = document.createElement(element);
-    }
-    setId(id) {
-        this.htmlelement.id = id;
-    }
-    setClassName(className) {
-        this.htmlelement.className = className;
-    }
-    setType(type) {
-        this.htmlelement.type = type;
-    }
-    setText(text) {
-        this.htmlelement.innerHTML = text;
-    }
-    setOnClick(func) {
-        this.htmlelement.onclick = func;
-    }
-    setChild(childArr) {
-        childArr.forEach((child) => {
-            this.htmlelement.appendChild(child.htmlelement);
-        })
-    }
-    setParent(parent) {
-        parent.appendChild(this.htmlelement);
-    }
-}
-
-const elementCreator = (obj) => {
-    let elem = new elemCreator(obj.element);
-    if (obj.id) elem.setId(obj.id);
-    if (obj.className) elem.setClassName(obj.className)
-    if (obj.type) elem.setType(obj.type);
-    return elem;
-}
+let theme = true;
 
 const createNewTaskForm = () => {
     closeAllTasks();
@@ -71,20 +24,22 @@ const createNewTaskForm = () => {
 
     let newForm = elementCreator({ element: 'div', id: 'taskCreation', className: 'form' });
     let fieldSet = elementCreator({ element: 'div', className: 'fieldset' })
+    fieldSet.htmlelement.style =
+        `background-color: ${theme ? "rgb(226 220 255)" : "rgb(80 80 80)"};
+        color: ${theme ? "black" : "white"};`;
     let newLegend = elementCreator({ element: 'legend' })
     newLegend.setText('Creating new task');
 
     let warningBox = elementCreator({ element: 'div', className: 'labelBox' });
     let exitButton = elementCreator({ element: 'button', type: 'button' })
     exitButton.setText('Close');
-    exitButton.onclick = function () {
-        let form = document.getElementById('taskCreation');
-        document.body.removeChild(form);
+    exitButton.setOnClick(function () {
+        document.getElementById('taskCreation').remove();
         createPage();
         showTasks();
-    }
+    })
 
-    let warningLabel = elementCreator({ element: 'label', id: 'warning' })
+    let warningLabel = elementCreator({ element: 'label', id: 'warning' });
     warningBox.setChild([exitButton, warningLabel]);
 
     let lvlBox = elementCreator({ element: 'div', className: 'inputBox' });
@@ -92,34 +47,36 @@ const createNewTaskForm = () => {
     let lvllabel = elementCreator({ element: 'label' })
     lvllabel.setText('Select difficulty of task ');
 
-    let lvlInput = elementCreator({ element: 'select', id: 'lvl', className: 'input' })
+    let lvlInput = elementCreator({ element: 'select', id: 'lvl', className: 'input' });
     difficulties.forEach((difficulty) => {
-        lvlInput.setChild([elementCreator({ element: 'option' }).setText(difficulty)]);
+        let dif = elementCreator({ element: 'option' });
+        dif.setText(difficulty)
+        lvlInput.setChild([dif]);
     })
     lvlBox.setChild([lvllabel, lvlInput]);
 
-    let timeBox = elementCreator({ element: 'div', className: 'inputBox' })
+    let timeBox = elementCreator({ element: 'div', className: 'inputBox' });
 
-    let datelabel = elementCreator({ element: 'label' })
+    let datelabel = elementCreator({ element: 'label' });
     datelabel.setText('Enter deadline ');
 
-    let dateInput = elementCreator({ element: 'input', id: 'date', className: 'input', type: 'date' })
+    let dateInput = elementCreator({ element: 'input', id: 'date', className: 'input', type: 'date' });
     timeBox.setChild([datelabel, dateInput]);
 
-    let targetUserBox = elementCreator({ element: 'div', className: 'inputBox' })
+    let targetUserBox = elementCreator({ element: 'div', className: 'inputBox' });
 
-    let targetUserlabel = elementCreator({ element: 'label' })
+    let targetUserlabel = elementCreator({ element: 'label' });
     targetUserlabel.setText('Enter recipients name ');
 
-    let targetUserInput = elementCreator({ element: 'select', id: 'targetUser', className: 'input' })
+    let targetUserInput = elementCreator({ element: 'select', id: 'targetUser', className: 'input' });
     for (var user in users) {
-        let option = elementCreator({ element: 'option' })
+        let option = elementCreator({ element: 'option' });
         option.setText(user);
         targetUserInput.setChild([option]);
     }
     targetUserBox.setChild([targetUserlabel, targetUserInput]);
 
-    let finishButton = elementCreator({ element: 'button', type: 'button' })
+    let finishButton = elementCreator({ element: 'button', type: 'button' });
     finishButton.setOnClick(getData);
     finishButton.setText('Create task');
 
@@ -138,108 +95,11 @@ const createNewTaskForm = () => {
     newForm.setParent(document.body);
 }
 
-class Task {
-    constructor(name, textOfTask, lvl, timeOfEnding, id, targetUser) {
-        this.name = name;
-        this.textOfTask = textOfTask;
-        this.lvl = lvl;
-        this.timeOfEnding = timeOfEnding;
-        this.id = id;
-        this.author = activeUser;
-        this.targetUser = targetUser;
-    }
-    remainingTime() {
-        let date = new Date();
-        let endingDate = parseInt(this.timeOfEnding.split('-')[2], 10);
-        return endingDate - date.getDate();
-    }
-    priority() {
-        let timeLeft = this.remainingTime();
-        let difficultyNumber = difficulties.length - difficulties.indexOf(this.lvl);
-        return timeLeft * difficultyNumber;
-    }
-    createForm() {
-        //создание новой формы
-        let newForm = elementCreator({ element: 'task', className: 'form' });
-
-        let fieldSet = elementCreator({ element: 'div', className: 'fieldset' });
-
-        //создание новой легенды
-        let newLegend = elementCreator({ element: 'legend' });
-
-        newLegend.setText(this.name);
-
-        let authorBox = elementCreator({ element: 'div', className: 'labelBox' });
-
-        let authorLabel = elementCreator({ element: 'label' });
-
-        authorLabel.setText(`appointed by: ${this.author}`);
-
-        authorBox.setChild([authorLabel]);
-
-        let labelBox = elementCreator({ element: 'div', className: 'labelBox' });
-
-        let timelabel = elementCreator({ element: 'label' });
-
-        let remainingTime = this.remainingTime();
-
-        timelabel.setText(`Deadline: ${Math.abs(remainingTime)} day ${(Math.abs(remainingTime) == 1 ? "" : "s")} ${(remainingTime >= 0 ? " left" : " late")}`);
-
-        let lvllabel = elementCreator({ element: 'label' });
-        lvllabel.setText(`Difficulty: ${this.lvl}`);
-        labelBox.setChild([timelabel, lvllabel]);
-
-        let textlabel = elementCreator({ element: 'label' });
-        textlabel.setText(`Task description:<br><br> ${this.textOfTask}`);
-
-        let deleteButton = elementCreator({ element: 'button', type: 'button', id: this.id });
-        deleteButton.setText('finish the task');
-        deleteButton.setOnClick(this.removeTask);
-
-        fieldSet.setChild([
-            newLegend,
-            authorBox,
-            labelBox,
-            textlabel,
-            deleteButton
-        ])
-
-        newForm.setChild([fieldSet]);
-
-        newForm.setParent(document.body);
-    }
-    removeTask() {
-        users[activeUser].tasks.forEach((task) => {
-            if (task.id == +this.id) {
-                users[activeUser].tasks.splice(users[activeUser].tasks.indexOf(task), 1);
-            }
-            showTasks();
-        })
-    }
-}
-
-class User {
-    constructor(name, surname, username, email, password) {
-        this.name = name;
-        this.surname = surname;
-        this.username = username;
-        this.email = email;
-        this.password = password;
-        this.tasks = [];
-    }
-}
-
-let testUser1 = new User(1, 1, 1, 1, 1);
-users[1] = testUser1;
-
-let testUser2 = new User(2, 2, 2, 2, 2);
-users[2] = testUser2;
-
 const getData = () => {
     let name = document.getElementById('name').value;
-    let text = document.getElementById('text').value;
+    let textOfTask = document.getElementById('text').value;
     let lvl = document.getElementById('lvl').value;
-    let date = document.getElementById('date').value;
+    let timeOfEnding = document.getElementById('date').value;
     let targetUser = document.getElementById('targetUser').value;
 
     if (!name || !text || !lvl || !date) {
@@ -249,9 +109,9 @@ const getData = () => {
 
     createPage();
 
-    let task = new Task(name, text, lvl, date, ID);
+    let task = new Task(name, textOfTask, lvl, timeOfEnding, id);
 
-    ++ID;
+    ++id;
 
     users[targetUser].tasks.push(task);
 
@@ -266,8 +126,9 @@ const getData = () => {
 
 const createPage = () => {
 
-    let buttonBox = elementCreator({ element: 'div', id: 'interface', className: 'buttonBox' })
-    let logoutButton = elementCreator({ element: 'button', id: 'intarface' })
+    let buttonBox = elementCreator({ element: 'div', id: 'interface', className: 'buttonBox' });
+    let logoutButton = elementCreator({ element: 'button', id: 'intarface' });
+    let changeThemeButton = elementCreator({ element: 'button', id: 'intarface' });
 
     logoutButton.setText('Log out');
     logoutButton.setOnClick(function () {
@@ -278,12 +139,18 @@ const createPage = () => {
         loginPage();
     });
 
+    changeThemeButton.setText('Change theme');
+    changeThemeButton.setOnClick(function () {
+        theme = !theme;
+        document.getElementById("body").style = `background-color: ${theme ? "rgb(199 186 186)" : "rgb(36 36 36)"}`;
+    })
+
     let createTaskButton = elementCreator({ element: 'button', id: 'taskcreation' });
 
     createTaskButton.setText('Create new task');
     createTaskButton.setOnClick(createNewTaskForm);
 
-    buttonBox.setChild([logoutButton, createTaskButton]);
+    buttonBox.setChild([logoutButton, createTaskButton, changeThemeButton]);
     buttonBox.setParent(document.body);
 }
 
@@ -373,10 +240,13 @@ const getRegisterData = () => {
 
 const registerPage = () => {
 
-    let regForm = elementCreator({ element: 'div', id: 'regForm', className: 'form' })
-    let fieldSet = elementCreator({ element: 'div', className: 'fieldset' })
-    let warningBox = elementCreator({ element: 'div', className: 'labelBox' })
-    let backButton = elementCreator({ element: 'button', type: 'button' })
+    let regForm = elementCreator({ element: 'div', id: 'regForm', className: 'form' });
+    let fieldSet = elementCreator({ element: 'div', className: 'fieldset' });
+    fieldSet.htmlelement.style =
+        `background-color: ${theme ? "rgb(226 220 255)" : "rgb(80 80 80)"};
+        color: ${theme ? "black" : "white"};`;
+    let warningBox = elementCreator({ element: 'div', className: 'labelBox' });
+    let backButton = elementCreator({ element: 'button', type: 'button' });
 
     backButton.setText('back to login');
     backButton.setOnClick(function () {
@@ -386,11 +256,11 @@ const registerPage = () => {
 
     backButton.setParent(document.body);
 
-    let warningLabel = elementCreator({ element: 'label', id: 'warning' })
+    let warningLabel = elementCreator({ element: 'label', id: 'warning' });
     warningBox.setChild([backButton, warningLabel]);
 
-    let buttonBox = elementCreator({ element: 'div', className: 'buttonBox' })
-    let regButton = elementCreator({ element: 'button', type: 'button' })
+    let buttonBox = elementCreator({ element: 'div', className: 'buttonBox' });
+    let regButton = elementCreator({ element: 'button', type: 'button' });
 
     regButton.setText('Register');
     regButton.setOnClick(function () {
@@ -417,16 +287,20 @@ const registerPage = () => {
 
 const loginPage = () => {
 
-    let loginForm = elementCreator({ element: 'div', id: 'loginForm', className: 'form' })
-    let fieldSet = elementCreator({ element: 'div', className: 'fieldset' })
-    let warningLabel = elementCreator({ element: 'label', id: 'warning' })
-    let buttonBox = elementCreator({ element: 'div', className: 'buttonBox' })
-    let loginButton = elementCreator({ element: 'button', type: 'button' })
+    let loginForm = elementCreator({ element: 'div', id: 'loginForm', className: 'form' });
+    let fieldSet = elementCreator({ element: 'div', className: 'fieldset' });
+    fieldSet.htmlelement.style =
+        `background-color: ${theme ? "rgb(226 220 255)" : "rgb(80 80 80)"};
+        color: ${theme ? "black" : "white"};`;
+
+    let warningLabel = elementCreator({ element: 'label', id: 'warning' });
+    let buttonBox = elementCreator({ element: 'div', className: 'buttonBox' });
+    let loginButton = elementCreator({ element: 'button', type: 'button' });
 
     loginButton.setText('Sign In');
     loginButton.setOnClick(getLoginData);
 
-    let regButton = elementCreator({ element: 'button', type: 'button' })
+    let regButton = elementCreator({ element: 'button', type: 'button' });
 
     regButton.setText('Sign Up');
     regButton.setOnClick(function () {
@@ -434,15 +308,15 @@ const loginPage = () => {
         registerPage();
     })
 
-    let box = elementCreator({ element: 'div', id: 'box' })
-    let checkBox = elementCreator({ element: 'div', className: 'checkbox' })
+    let box = elementCreator({ element: 'div', id: 'box' });
+    let checkBox = elementCreator({ element: 'div', className: 'checkbox' });
     let checkBoxLabel = elementCreator({ element: 'label' });
     checkBoxLabel.setText('Remember me ');
 
     let checkBoxInput = elementCreator({ element: 'input', id: 'checkbox', type: 'checkbox' });
 
-    checkBox.setChild([checkBoxInput])
-    box.setChild([checkBoxLabel, checkBox])
+    checkBox.setChild([checkBoxInput]);
+    box.setChild([checkBoxLabel, checkBox]);
     buttonBox.setChild([loginButton, regButton]);
     fieldSet.setChild([
         warningLabel,
@@ -470,9 +344,27 @@ const warningToHTML = (errText) => {
     console.error(errText);
 }
 
+const objToTask = (obj) => {
+    let task = new Task(obj.name, obj.textOfTask, obj.lvl, obj.timeOfEnding, obj.id, obj.targetUser);
+    return task;
+}
+
+document.getElementById("body").style = `background-color: ${theme ? "rgb(199 186 186)" : "rgb(36 36 36)"}`;
+
 let log = JSON.parse(localStorage.getItem('login'));
 let paswd = JSON.parse(localStorage.getItem('password'));
 let us = JSON.parse(localStorage.getItem('users'));
+
+Object.keys(us).forEach(key => {
+    us[key].tasks = us[key].tasks.map((task) => {
+        return objToTask(task)
+    })
+})
+
+if (!us) {
+    users = [];
+    loginPage();
+}
 
 if (log && paswd) {
     users = us;
@@ -481,6 +373,7 @@ if (log && paswd) {
 }
 
 else {
+    users = us;
     localStorage.setItem('login', JSON.stringify(''));
     localStorage.setItem('password', JSON.stringify(''));
     loginPage();
