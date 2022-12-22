@@ -70,6 +70,8 @@ const createNewTaskForm = () => {
 
     let targetUserInput = elementCreator({ element: 'select', id: 'targetUser', className: 'input' });
     for (var user in users) {
+        l(users)
+        if(!users[user]) continue;
         let option = elementCreator({ element: 'option' });
         option.setText(user);
         targetUserInput.setChild([option]);
@@ -109,7 +111,7 @@ const getData = () => {
 
     createPage();
 
-    let task = new Task(name, textOfTask, lvl, timeOfEnding, id);
+    let task = new Task(name, textOfTask, lvl, timeOfEnding, id, targetUser, activeUser);
 
     ++id;
 
@@ -345,7 +347,7 @@ const warningToHTML = (errText) => {
 }
 
 const objToTask = (obj) => {
-    let task = new Task(obj.name, obj.textOfTask, obj.lvl, obj.timeOfEnding, obj.id, obj.targetUser);
+    let task = new Task(obj.name, obj.textOfTask, obj.lvl, obj.timeOfEnding, obj.id, obj.targetUser, obj.author);
     return task;
 }
 
@@ -355,11 +357,16 @@ let log = JSON.parse(localStorage.getItem('login'));
 let paswd = JSON.parse(localStorage.getItem('password'));
 let us = JSON.parse(localStorage.getItem('users'));
 
-Object.keys(us).forEach(key => {
-    us[key].tasks = us[key].tasks.map((task) => {
-        return objToTask(task)
+if (us) {
+    Object.keys(us).forEach(key => {
+        if (!us[key]) {
+            return;
+        }
+        us[key].tasks = us[key].tasks.map((task) => {
+            return objToTask(task)
+        })
     })
-})
+}
 
 if (!us) {
     users = [];
@@ -370,9 +377,10 @@ if (log && paswd) {
     users = us;
     activeUser = log;
     createPage();
+    showTasks();
 }
 
-else {
+if (us && !(log && paswd)) {
     users = us;
     localStorage.setItem('login', JSON.stringify(''));
     localStorage.setItem('password', JSON.stringify(''));

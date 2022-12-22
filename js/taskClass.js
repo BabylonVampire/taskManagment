@@ -1,11 +1,11 @@
 class Task {
-    constructor(name, textOfTask, lvl, timeOfEnding, id, targetUser) {
+    constructor(name, textOfTask, lvl, timeOfEnding, id, targetUser, author) {
         this.name = name;
         this.textOfTask = textOfTask;
         this.lvl = lvl;
         this.timeOfEnding = timeOfEnding;
         this.id = id;
-        this.author = activeUser;
+        this.author = author;
         this.targetUser = targetUser;
     }
     remainingTime() {
