@@ -1,5 +1,3 @@
-let l = console.log;
-
 const difficulties = [
     '',
     'Easy',
@@ -8,8 +6,6 @@ const difficulties = [
     'Hard',
     'Hardcore'
 ];
-
-// СОХРАНЕНИЕ ЗАДАЧ В ЛОКАЛ СТОРЕДЖ
 
 let id = 0;
 let users = {};
@@ -70,7 +66,6 @@ const createNewTaskForm = () => {
 
     let targetUserInput = elementCreator({ element: 'select', id: 'targetUser', className: 'input' });
     for (var user in users) {
-        l(users)
         if(!users[user]) continue;
         let option = elementCreator({ element: 'option' });
         option.setText(user);
